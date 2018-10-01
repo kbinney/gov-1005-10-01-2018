@@ -8,3 +8,13 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+
+## Italian Polling
+```{r}
+library(tidyverse)
+
+polling_csv <- read.csv("polls_IT-parliament_2018-10-01.csv")
+polling_csv %>% 
+  summary()
+```
+
