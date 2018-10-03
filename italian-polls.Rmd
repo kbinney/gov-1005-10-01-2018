@@ -6,15 +6,38 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
 ```
 
 ## Italian Polling
-```{r}
+```{r, echo = FALSE, message = FALSE}
 library(tidyverse)
-
-polling_csv <- read.csv("polls_IT-parliament_2018-10-01.csv")
-polling_csv %>% 
-  summary()
 ```
+
+```{r, message = FALSE, echo = FALSE}
+polling_csv <- read_csv("https://pollofpolls.eu/get/polls/IT-parliament/format/csv")
+
+tidy_polling <- polling_csv %>% 
+  gather(key = "party", value = "voteShare", -(date:source), na.rm = TRUE, convert = TRUE)  %>% 
+  mutate(voteShare = parse_number(voteShare)) %>% 
+  select(date, firm, n, party, voteShare) %>% 
+  filter(party %in% c("PD", "M5S", "LN", "FIPDLFI"))
+
+```
+
+```{r first plot, error = FALSE}
+polling_csv %>% 
+  ggplot(aes(x = date, y = LN)) + geom_point()
+```
+```{r top 4 parties, message = FALSE}
+tidy_polling %>% 
+  filter(date >= "2017-09-26") %>% 
+  ggplot(aes(x = date, y = voteShare, color = party)) + 
+  geom_point(alpha = .2) + 
+  geom_smooth(size = 0.6) +
+  ggtitle("Italian Polling Results") +
+  labs(y = "Party Vote Share", x = "Date")
+
+```
+
 
