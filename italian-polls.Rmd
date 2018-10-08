@@ -17,48 +17,29 @@ library(tidyverse)
 ```{r, message = FALSE, echo = FALSE}
 polling_csv <- read_csv("https://pollofpolls.eu/get/polls/IT-parliament/format/csv", guess_max = 3000)
 
-tidy_polling <- polling_csv %>% 
-  gather(key = "party", value = "voteShare", -(date:source), na.rm = TRUE, convert = TRUE)  %>% 
-  select(date, firm, n, party, voteShare, sd) %>% 
-  filter(party %in% c("PD", "M5S", "LN", "FIPDLFI"))
-
-```
-
-```{r first plot, error = FALSE}
-polling_csv %>% 
-  ggplot(aes(x = date, y = LN)) + geom_point()
-```
-```{r top 4 parties, message = FALSE}
-tidy_polling %>% 
-  filter(date >= "2017-09-26") %>% 
-  ggplot(aes(x = date, y = voteShare, color = party)) + 
-  geom_point(size = 0.8, alpha = .2) + 
-  geom_smooth(size = 0.6) +
-  ggtitle("Italian Polling Results") +
-  labs(y = "Party Vote Share", x = "Date")
-
-```
-## Top Firms
-```{r, message = FALSE}
 top_firms <- polling_csv %>% 
   mutate(firm = stringr::str_to_upper(firm)) %>% 
   count(firm) %>% 
   filter(nn > 100)
 
-tidy_polling_top_firms <- tidy_polling %>% 
+tidy_polling <- polling_csv %>% 
+  gather(key = "party", value = "voteShare", -(date:source), na.rm = TRUE, convert = TRUE)  %>% 
   mutate(firm = stringr::str_to_upper(firm)) %>% 
-  filter(firm %in% top_firms$firm)
+  select(date, firm, n, party, voteShare, sd) %>% 
+  filter(party %in% c("PD", "M5S", "LN", "FIPDLFI"),
+         firm %in% top_firms$firm)
+
 ```
 
-## Graph with only top firms
+## Italian Polling Data
 
 ```{r top_4_clean_firm, message = FALSE}
-tidy_polling_top_firms %>% 
+tidy_polling %>% 
   filter(date >= "2017-09-26") %>% 
   ggplot(aes(x = date, y = voteShare, color = party)) + 
   geom_point(size = 0.8, alpha = .2) + 
   geom_smooth(size = 0.6) +
-  ggtitle("Italian Polling Results") +
+  ggtitle("Italian Polling Results", subtitle = "Four major parties, 9/26/2017-present, with only results from reputable polling firms") +
   labs(y = "Party Vote Share", x = "Date")
 
 ```
